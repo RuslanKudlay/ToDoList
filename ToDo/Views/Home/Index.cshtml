@@ -1,0 +1,139 @@
+﻿@using BAL.Models;
+@model List<ToDoItemModel>;
+
+
+<div class="container">
+    <div>
+        <h1>ToDoList</h1>
+    </div>
+    <a class="btn btn-primary button" asp-controller="Home" asp-action="AddToDoItem">Add item</a>
+
+    @if (Model is null) {
+        <div>
+            <span class="alert-warning">
+                List of items is empty!
+            </span>
+        </div>
+    }
+    else
+    {
+        <div class="items">
+            @foreach (var item in Model)
+            {
+                <div class="item" id="itemContainer_@item.Id">
+                    <div class="main__content-item">
+                        <div>
+                            <input type="checkbox" class="checkbox" id="checkbox_@item.Id" onchange="toggleStyles('@item.Id')" />
+                        </div>
+                        <div class="item__property">
+                            <div id="title_@item.Id">
+                                @item.TodoTitle
+                            </div>
+                            <div id="description_@item.Id">
+                                @item.TodoDescription
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div>
+                        <form asp-action="DeleteToDoItemById" asp-controller="Home" method="post">
+                            <input type="hidden" name="itemId" value="@item.Id" />
+                            <button type="submit" class="btn btn-danger main__content-btn">Delete</button>
+                        </form>
+                        <button type="button" style="display:none" onclick="applyEdit('@item.Id')" class="btn btn-success main__content-btn">Apply</button>
+                        <button type="button" onclick="editItem('@item.Id', '@item.TodoTitle', '@item.TodoDescription')" class="btn btn-warning btn-edt main__content-btn">Edit</button>
+                        <button type="button" onclick="closeEdit('@item.Id')" class="btn btn-secondary main__content-btn" style="display:none">Close</button>
+                        <input type="hidden" id="originalTitle_@item.Id" value="@item.TodoTitle" />
+                        <input type="hidden" id="originalDescription_@item.Id" value="@item.TodoDescription" />
+                    </div>
+                </div>
+            }
+            <script>
+                function editItem(itemId) {
+                    var currentTitle = document.getElementById('title_' + itemId).innerText;
+                    var currentDescription = document.getElementById('description_' + itemId).innerText;
+
+                    document.getElementById('title_' + itemId).innerHTML = '<input class="form-control" type="text" id="editTitle_' + itemId + '" value="' + currentTitle + '">';
+                    document.getElementById('description_' + itemId).innerHTML = '<input class="form-control edit-input" type="text" id="editDescription_' + itemId + '" value="' + currentDescription + '">';
+
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-success').style.display = 'block';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-secondary').style.display = 'block';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-warning').style.display = 'none';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-danger').style.display = 'none';
+                    document.querySelector('#itemContainer_' + itemId + ' .checkbox').style.display = 'none';
+                }
+
+                function applyEdit(itemId) {
+                    var toDoTitle = document.getElementById('editTitle_' + itemId).value;
+                    var toDoDescription = document.getElementById('editDescription_' + itemId).value;
+
+                    var data = {
+                        id: itemId,
+                        toDoTitle: toDoTitle,
+                        toDoDescription: toDoDescription
+                    };
+
+
+
+                    $.ajax({
+                        url: '/Home/EditItem',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function (response) {
+                            document.getElementById('title_' + itemId).innerText = response.toDoTitle;
+                            document.getElementById('description_' + itemId).innerText = response.toDoDescription;
+
+                            console.log(response);
+                        },
+                        error: function (error) {
+                            console.error(error);
+                        }
+                    });
+
+                    
+
+                    document.getElementById('title_' + itemId).innerText = data.toDoTitle;
+                    document.getElementById('description_' + itemId).innerText = data.toDoDescription;
+
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-success').style.display = 'none';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-secondary').style.display = 'none';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-warning').style.display = 'block';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-danger').style.display = 'block';
+                    document.querySelector('#itemContainer_' + itemId + ' .checkbox').style.display = 'block';
+                }
+
+                function closeEdit(itemId) {
+                    var originalTitle = document.getElementById('originalTitle_' + itemId).value;
+                    var originalDescription = document.getElementById('originalDescription_' + itemId).value;
+
+                    document.getElementById('title_' + itemId).innerText = originalTitle;
+                    document.getElementById('description_' + itemId).innerText = originalDescription;
+
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-success').style.display = 'none';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-secondary').style.display = 'none';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-warning').style.display = 'block';
+                    document.querySelector('#itemContainer_' + itemId + ' .btn-danger').style.display = 'block';
+                    document.querySelector('#itemContainer_' + itemId + ' .checkbox').style.display = 'block';
+                }
+
+                function toggleStyles(itemId) {
+                    var checkbox = $('#checkbox_' + itemId);
+                    var itemContainer = $('#itemContainer_' + itemId);
+                    var title = $('#title_' + itemId);
+
+                    if (checkbox.prop('checked')) {
+                        itemContainer.css('background-color', '#DCDCDC');
+                        itemContainer.css('color', 'black');
+                        itemContainer.css('text-decoration', 'line-through')
+                    } else {
+                        itemContainer.css('background-color', '');
+                        itemContainer.css('color', '');
+                        itemContainer.css('text-decoration', '')
+                    }
+                }
+            </script>
+        </div>
+    }
+</div>
+

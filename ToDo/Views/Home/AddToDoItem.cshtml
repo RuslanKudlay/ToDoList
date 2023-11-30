@@ -1,0 +1,22 @@
+﻿@using BAL.Models;
+@model ToDoItemModel;
+
+<form class="add__block-container" method="post">
+    <div class="element__form">
+        <h2>
+            Adding todo item
+        </h2>
+    </div>
+    <div class="element__form">
+        <label>Enter title:</label>
+        <input class="form-control" type="text" asp-for="TodoTitle" />
+    </div>
+    <div class="element__form">
+        <label>Enter description:</label>
+        <input class="form-control" type="text" asp-for="TodoDescription" />
+    </div>
+    <div class="button__form">
+        <button class="btn btn-primary" type="submit" asp-controller="Home" asp-action="CreateToDoItem">Add item</button>
+        <button class="btn btn-warning" asp-controller="Home" asp-action="Index">Back</button>
+    </div>
+</form>
